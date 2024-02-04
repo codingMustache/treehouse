@@ -32,5 +32,6 @@ for file in "${files_with_changes[@]}"; do
   git commit -m "$commit_message"
 done
 
+git push origin main
 # Open the working tree
 git status
