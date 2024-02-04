@@ -1,27 +1,24 @@
 #!/bin/bash
 
-# Run git status and capture the output
-status_output=$(git status --porcelain)
+# Run git diff and capture the output
+diff_output=$(git diff --name-only)
 
-# Initialize an empty array to store files to commit
-files_to_commit=()
+# Initialize an empty array to store files with changes
+files_with_changes=()
 
-# Read each line of the status output
+# Read each line of the diff output
 while IFS= read -r line; do
-  # Check if the line starts with "[AMDR]" indicating a file that has been modified, added, deleted, or renamed
-  if [[ $line =~ ^[AMDR] ]]; then
-    # Extract the file path and add it to the files_to_commit array
-    file_path=${line#??}
-    remove_whitespace=${file_path//[[:space:]]/}
-    files_to_commit+=("$remove_whitespace")
-  fi
-done <<< "$status_output"
+  # Extract the file path and add it to the files_with_changes array
+  file_path=$line
+  remove_whitespace=${file_path//[[:space:]]/}
+  files_with_changes+=("$remove_whitespace")
+done <<< "$diff_output"
 
-# Remove duplicates from the files_to_commit array
-files_to_commit=($(echo "${files_to_commit[@]}" | awk -v RS=' ' '!a[$1]++'))
+# Remove duplicates from the files_with_changes array
+files_with_changes=($(echo "${files_with_changes[@]}" | awk -v RS=' ' '!a[$1]++'))
 
-# Loop over the files to commit array
-for file in "${files_to_commit[@]}"; do
+# Loop over the files with changes array
+for file in "${files_with_changes[@]}"; do
   # Add the file to the Git repository
   git add "$file"
 
